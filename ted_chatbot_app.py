@@ -32,12 +32,21 @@ if user_input and openai_api_key:
     st.session_state.messages.append({"role": "user", "content": user_input})
 
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=st.session_state.messages,
-            api_key=openai_api_key
-        )
-        reply = response.choices[0].message["content"]
+        import requests
+
+headers = {
+    "Authorization": f"Bearer {openai_api_key}",
+    "HTTP-Referer": "https://yourstreamlitapp.streamlit.app",  # Or your own domain
+    "X-Title": "Ted - Plushie Chatbot"
+}
+
+data = {
+    "model": "mistralai/mixtral-8x7b-instruct",  # Free smart model
+    "messages": st.session_state.messages
+}
+
+response = requests.post("https://openrouter.ai/api/v1/chat/completions", json=data, headers=headers)
+reply = response.json()["choices"][0]["message"]["content"]
         st.session_state.messages.append({"role": "assistant", "content": reply})
     except Exception as e:
         st.error(f"Error: {e}")
